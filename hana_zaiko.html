@@ -84,6 +84,67 @@
     background: var(--blue-light);
   }
 
+  .mode-btn.settings {
+    border-color: var(--border);
+    color: var(--text-sub);
+    background: var(--white);
+    font-size: 14px;
+    padding: 14px;
+  }
+
+  /* ===== SETTINGS SCREEN ===== */
+  #settings-screen {
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    gap: 16px;
+  }
+  #settings-screen h1 { font-size: 20px; font-weight: 700; text-align: center; }
+  #settings-screen p { color: var(--text-sub); font-size: 13px; text-align: center; }
+  .settings-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+  .settings-label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+  .settings-input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 13px;
+    background: var(--white);
+  }
+  .settings-input:focus { outline: none; border-color: var(--green); }
+  .settings-current {
+    font-size: 11px;
+    color: var(--text-sub);
+    word-break: break-all;
+    background: #f2f2ef;
+    padding: 8px 10px;
+    border-radius: 6px;
+  }
+  .settings-save-btn {
+    width: 100%;
+    padding: 14px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .settings-back-btn {
+    width: 100%;
+    padding: 12px;
+    background: none;
+    color: var(--text-sub);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    font-size: 14px;
+    cursor: pointer;
+  }
+
   /* ===== HEADER ===== */
   #app { display: none; }
 
@@ -351,6 +412,21 @@
   <p>使用するモードを選択してください</p>
   <button class="mode-btn honsha" onclick="selectMode('honsha')">🏢 本社モード<br><span style="font-size:13px;font-weight:400;">品目管理・仕入れ数入力</span></button>
   <button class="mode-btn kyoten" onclick="selectMode('kyoten')">📦 拠点モード<br><span style="font-size:13px;font-weight:400;">残数入力</span></button>
+  <button class="mode-btn settings" onclick="openSettings()">⚙️ GAS URL設定</button>
+</div>
+
+<!-- 設定画面 -->
+<div id="settings-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;gap:16px;">
+  <h1>⚙️ GAS URL設定</h1>
+  <p>Google Apps ScriptのデプロイURLを入力してください</p>
+  <div class="settings-form">
+    <div class="settings-label">現在のURL</div>
+    <div class="settings-current" id="settings-current">未設定</div>
+    <div class="settings-label">新しいURL</div>
+    <input class="settings-input" id="settings-url-input" type="url" placeholder="https://script.google.com/..." />
+    <button class="settings-save-btn" onclick="saveSettingsUrl()">保存する</button>
+    <button class="settings-back-btn" onclick="closeSettings()">← 戻る</button>
+  </div>
 </div>
 
 <!-- メインアプリ -->
@@ -426,6 +502,30 @@ window.addEventListener('DOMContentLoaded', () => {
     document.getElementById('gas-url-input').value = gasUrl;
   }
 });
+
+// ===== SETTINGS =====
+function openSettings() {
+  const current = localStorage.getItem('gasUrl') || '未設定';
+  document.getElementById('settings-current').textContent = current;
+  document.getElementById('settings-url-input').value = current === '未設定' ? '' : current;
+  document.getElementById('mode-screen').style.display = 'none';
+  document.getElementById('settings-screen').style.display = 'flex';
+}
+
+function closeSettings() {
+  document.getElementById('settings-screen').style.display = 'none';
+  document.getElementById('mode-screen').style.display = 'flex';
+}
+
+function saveSettingsUrl() {
+  const val = document.getElementById('settings-url-input').value.trim();
+  if (!val.startsWith('https://')) { showToast('正しいURLを入力してください'); return; }
+  gasUrl = val;
+  localStorage.setItem('gasUrl', gasUrl);
+  document.getElementById('gas-banner').style.display = 'none';
+  showToast('URLを保存しました');
+  closeSettings();
+}
 
 // ===== MODE =====
 function selectMode(mode) {
