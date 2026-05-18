@@ -1,0 +1,667 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>花材在庫管理</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+
+  :root {
+    --bg: #f7f7f5;
+    --white: #ffffff;
+    --border: #e0e0da;
+    --text: #1a1a1a;
+    --text-sub: #888;
+    --green: #2d6a4f;
+    --green-light: #e8f5ee;
+    --red: #c0392b;
+    --red-light: #fdecea;
+    --blue: #2563eb;
+    --blue-light: #eff6ff;
+    --shadow: 0 1px 4px rgba(0,0,0,0.08);
+    --radius: 10px;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN', 'Noto Sans JP', sans-serif;
+    font-size: 15px;
+    min-height: 100vh;
+  }
+
+  /* ===== MODE SELECT ===== */
+  #mode-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 24px;
+    gap: 16px;
+  }
+
+  #mode-screen h1 {
+    font-size: 20px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    text-align: center;
+  }
+
+  #mode-screen p {
+    color: var(--text-sub);
+    font-size: 13px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .mode-btn {
+    width: 100%;
+    max-width: 320px;
+    padding: 20px;
+    border-radius: var(--radius);
+    border: 2px solid var(--border);
+    background: var(--white);
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    text-align: center;
+    transition: all 0.15s;
+  }
+
+  .mode-btn:active { transform: scale(0.97); }
+
+  .mode-btn.honsha {
+    border-color: var(--green);
+    color: var(--green);
+    background: var(--green-light);
+  }
+
+  .mode-btn.kyoten {
+    border-color: var(--blue);
+    color: var(--blue);
+    background: var(--blue-light);
+  }
+
+  /* ===== HEADER ===== */
+  #app { display: none; }
+
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    padding: 12px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: var(--shadow);
+  }
+
+  .header-title { font-size: 16px; font-weight: 700; }
+  .header-mode {
+    font-size: 12px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 600;
+  }
+  .header-mode.honsha { background: var(--green-light); color: var(--green); }
+  .header-mode.kyoten { background: var(--blue-light); color: var(--blue); }
+
+  .change-mode-btn {
+    font-size: 12px;
+    color: var(--text-sub);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+  }
+
+  /* ===== CONTENT ===== */
+  .content { padding: 12px 12px 80px; }
+
+  /* GAS設定バナー */
+  .gas-banner {
+    background: #fff8e1;
+    border: 1px solid #ffd54f;
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: #5d4037;
+  }
+  .gas-banner strong { display: block; margin-bottom: 4px; }
+  .gas-url-form { display: flex; gap: 8px; margin-top: 8px; }
+  .gas-url-input {
+    flex: 1;
+    padding: 8px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+  .gas-url-save {
+    padding: 8px 14px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+
+  /* 最終更新日 */
+  .last-updated {
+    font-size: 12px;
+    color: var(--text-sub);
+    text-align: right;
+    margin-bottom: 8px;
+    padding: 0 2px;
+  }
+
+  /* ===== TABLE ===== */
+  .table-wrap {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    overflow: hidden;
+    margin-bottom: 12px;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    background: #f2f2ef;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text-sub);
+    padding: 10px 8px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr { border-bottom: 1px solid var(--border); }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:active { background: #f9f9f7; }
+
+  tbody td {
+    padding: 10px 8px;
+    font-size: 14px;
+    vertical-align: middle;
+  }
+
+  .col-hinmoku { font-weight: 600; }
+  .col-hinshu { color: var(--text-sub); font-size: 13px; }
+  .col-shiire { color: var(--green); font-weight: 600; text-align: right; }
+  .col-zanzai { font-weight: 700; text-align: right; }
+  .col-zanzai.low { color: var(--red); }
+  .col-zanzai.ok { color: var(--green); }
+
+  .num-input {
+    width: 64px;
+    padding: 6px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    text-align: right;
+    -moz-appearance: textfield;
+    background: var(--white);
+  }
+  .num-input::-webkit-outer-spin-button,
+  .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+  .num-input:focus { outline: none; border-color: var(--blue); }
+
+  /* 本社モード：削除ボタン */
+  .del-btn {
+    background: none;
+    border: none;
+    color: var(--red);
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    line-height: 1;
+  }
+  .del-btn:active { background: var(--red-light); }
+
+  /* ===== ADD FORM (本社のみ) ===== */
+  .add-form {
+    background: var(--white);
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    padding: 14px;
+    margin-bottom: 12px;
+  }
+
+  .add-form h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--green);
+  }
+
+  .add-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+
+  .add-input {
+    flex: 1;
+    min-width: 80px;
+    padding: 10px 10px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 14px;
+    background: var(--bg);
+  }
+  .add-input:focus { outline: none; border-color: var(--green); background: var(--white); }
+
+  .add-btn {
+    width: 100%;
+    padding: 12px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: var(--radius);
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .add-btn:active { opacity: 0.8; }
+
+  /* ===== SAVE BUTTON ===== */
+  .save-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    padding: 12px 16px;
+    background: var(--white);
+    border-top: 1px solid var(--border);
+    box-shadow: 0 -2px 8px rgba(0,0,0,0.06);
+  }
+
+  .save-btn {
+    width: 100%;
+    padding: 14px;
+    border-radius: var(--radius);
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s;
+  }
+  .save-btn:active { opacity: 0.8; }
+  .save-btn.honsha { background: var(--green); color: white; }
+  .save-btn.kyoten { background: var(--blue); color: white; }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #333;
+    color: white;
+    padding: 10px 20px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: 600;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+    z-index: 999;
+  }
+  .toast.show { opacity: 1; }
+
+  /* ===== LOADING ===== */
+  .loading {
+    text-align: center;
+    padding: 24px;
+    color: var(--text-sub);
+    font-size: 14px;
+  }
+
+  /* ===== EMPTY ===== */
+  .empty {
+    text-align: center;
+    padding: 32px 16px;
+    color: var(--text-sub);
+    font-size: 14px;
+  }
+</style>
+</head>
+<body>
+
+<!-- モード選択画面 -->
+<div id="mode-screen">
+  <h1>🌸 花材在庫管理</h1>
+  <p>使用するモードを選択してください</p>
+  <button class="mode-btn honsha" onclick="selectMode('honsha')">🏢 本社モード<br><span style="font-size:13px;font-weight:400;">品目管理・仕入れ数入力</span></button>
+  <button class="mode-btn kyoten" onclick="selectMode('kyoten')">📦 拠点モード<br><span style="font-size:13px;font-weight:400;">残数入力</span></button>
+</div>
+
+<!-- メインアプリ -->
+<div id="app">
+  <div class="header">
+    <div class="header-title">🌸 花材在庫管理</div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="header-mode" id="header-mode-badge"></div>
+      <button class="change-mode-btn" onclick="changeMode()">切替</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- GAS URL設定バナー -->
+    <div class="gas-banner" id="gas-banner">
+      <strong>⚙️ 初期設定：Google Apps Script URLを入力してください</strong>
+      <span>設定後はデータがGoogleスプレッドシートと同期されます</span>
+      <div class="gas-url-form">
+        <input class="gas-url-input" id="gas-url-input" type="url" placeholder="https://script.google.com/..." />
+        <button class="gas-url-save" onclick="saveGasUrl()">保存</button>
+      </div>
+    </div>
+
+    <div class="last-updated" id="last-updated">最終更新：-</div>
+
+    <!-- 品目追加フォーム（本社のみ） -->
+    <div class="add-form" id="add-form" style="display:none;">
+      <h3>＋ 品目を追加</h3>
+      <div class="add-row">
+        <input class="add-input" id="new-hinmoku" placeholder="品目（例：バラ）" />
+        <input class="add-input" id="new-hinshu" placeholder="品種・色（例：赤）" />
+        <input class="add-input num-input" id="new-shiire" type="number" placeholder="仕入数" min="0" />
+      </div>
+      <button class="add-btn" onclick="addItem()">追加する</button>
+    </div>
+
+    <!-- テーブル -->
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr id="table-head"></tr>
+        </thead>
+        <tbody id="table-body">
+          <tr><td colspan="6" class="loading">読み込み中...</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- 保存ボタン -->
+  <div class="save-bar">
+    <button class="save-btn" id="save-btn" onclick="saveData()">保存して送信</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ===== STATE =====
+let currentMode = null; // 'honsha' | 'kyoten'
+let items = []; // [{id, hinmoku, hinshu, shiire, zanzai, updatedAt}]
+let gasUrl = '';
+
+// ===== INIT =====
+window.addEventListener('DOMContentLoaded', () => {
+  gasUrl = localStorage.getItem('gasUrl') || '';
+  const savedMode = localStorage.getItem('lastMode');
+  if (gasUrl) {
+    document.getElementById('gas-banner').style.display = 'none';
+  } else {
+    document.getElementById('gas-url-input').value = gasUrl;
+  }
+});
+
+// ===== MODE =====
+function selectMode(mode) {
+  currentMode = mode;
+  localStorage.setItem('lastMode', mode);
+  document.getElementById('mode-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'block';
+
+  const badge = document.getElementById('header-mode-badge');
+  badge.textContent = mode === 'honsha' ? '本社' : '拠点';
+  badge.className = 'header-mode ' + mode;
+
+  const saveBtn = document.getElementById('save-btn');
+  saveBtn.className = 'save-btn ' + mode;
+  saveBtn.textContent = mode === 'honsha' ? '仕入れ数を保存・送信' : '残数を保存・送信';
+
+  document.getElementById('add-form').style.display = mode === 'honsha' ? 'block' : 'none';
+
+  loadData();
+}
+
+function changeMode() {
+  document.getElementById('mode-screen').style.display = 'flex';
+  document.getElementById('app').style.display = 'none';
+}
+
+// ===== GAS URL =====
+function saveGasUrl() {
+  const val = document.getElementById('gas-url-input').value.trim();
+  if (!val.startsWith('https://')) { showToast('正しいURLを入力してください'); return; }
+  gasUrl = val;
+  localStorage.setItem('gasUrl', gasUrl);
+  document.getElementById('gas-banner').style.display = 'none';
+  showToast('URLを保存しました');
+  loadData();
+}
+
+// ===== LOAD DATA =====
+async function loadData() {
+  if (!gasUrl) {
+    renderTable();
+    return;
+  }
+  try {
+    const res = await fetch(gasUrl + '?action=get');
+    const data = await res.json();
+    if (data.items) {
+      items = data.items;
+      const lastAt = data.updatedAt || '';
+      document.getElementById('last-updated').textContent = '最終更新：' + (lastAt || '-');
+    }
+  } catch(e) {
+    // オフライン時はlocalStorageから
+    const local = localStorage.getItem('hana_items');
+    if (local) items = JSON.parse(local);
+  }
+  renderTable();
+}
+
+// ===== RENDER TABLE =====
+function renderTable() {
+  // ヘッダー
+  const head = document.getElementById('table-head');
+  if (currentMode === 'honsha') {
+    head.innerHTML = `
+      <th>品目</th>
+      <th>品種(色)</th>
+      <th style="text-align:right">仕入数</th>
+      <th style="text-align:right">残数</th>
+      <th></th>
+    `;
+  } else {
+    head.innerHTML = `
+      <th>品目</th>
+      <th>品種(色)</th>
+      <th style="text-align:right">仕入数</th>
+      <th style="text-align:right">残数入力</th>
+    `;
+  }
+
+  // ソート：残数が少ない順（入力済みのみ）
+  const sorted = [...items].sort((a, b) => {
+    const az = a.zanzai !== '' && a.zanzai !== null && a.zanzai !== undefined ? Number(a.zanzai) : 9999;
+    const bz = b.zanzai !== '' && b.zanzai !== null && b.zanzai !== undefined ? Number(b.zanzai) : 9999;
+    return az - bz;
+  });
+
+  const tbody = document.getElementById('table-body');
+
+  if (sorted.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="5" class="empty">品目がありません<br>本社モードで追加してください</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = sorted.map(item => {
+    const zanzaiVal = item.zanzai !== '' && item.zanzai !== null && item.zanzai !== undefined ? Number(item.zanzai) : null;
+    const shiireVal = item.shiire !== '' && item.shiire !== null ? Number(item.shiire) : 0;
+    const zanzaiClass = zanzaiVal === null ? '' : (zanzaiVal <= shiireVal * 0.2 ? 'low' : 'ok');
+
+    if (currentMode === 'honsha') {
+      return `
+        <tr>
+          <td class="col-hinmoku">${esc(item.hinmoku)}</td>
+          <td class="col-hinshu">${esc(item.hinshu)}</td>
+          <td class="col-shiire">
+            <input class="num-input" type="number" min="0"
+              value="${shiireVal}"
+              onchange="updateShiire('${item.id}', this.value)"
+            />
+          </td>
+          <td class="col-zanzai ${zanzaiClass}">${zanzaiVal !== null ? zanzaiVal + '本' : '-'}</td>
+          <td><button class="del-btn" onclick="deleteItem('${item.id}')">✕</button></td>
+        </tr>
+      `;
+    } else {
+      return `
+        <tr>
+          <td class="col-hinmoku">${esc(item.hinmoku)}</td>
+          <td class="col-hinshu">${esc(item.hinshu)}</td>
+          <td class="col-shiire">${shiireVal}本</td>
+          <td>
+            <input class="num-input" type="number" min="0"
+              value="${zanzaiVal !== null ? zanzaiVal : ''}"
+              placeholder="0"
+              onchange="updateZanzai('${item.id}', this.value)"
+            />
+          </td>
+        </tr>
+      `;
+    }
+  }).join('');
+}
+
+// ===== EDIT =====
+function updateShiire(id, val) {
+  const item = items.find(i => i.id === id);
+  if (item) { item.shiire = Number(val); item.updatedAt = nowStr(); }
+  renderTable();
+}
+
+function updateZanzai(id, val) {
+  const item = items.find(i => i.id === id);
+  if (item) { item.zanzai = val === '' ? null : Number(val); item.updatedAt = nowStr(); }
+  renderTable();
+}
+
+// ===== ADD =====
+function addItem() {
+  const hinmoku = document.getElementById('new-hinmoku').value.trim();
+  const hinshu  = document.getElementById('new-hinshu').value.trim();
+  const shiire  = document.getElementById('new-shiire').value;
+
+  if (!hinmoku) { showToast('品目を入力してください'); return; }
+
+  // 同じ品目＋品種が既にある場合は仕入れ数を加算
+  const existing = items.find(i => i.hinmoku === hinmoku && i.hinshu === hinshu);
+  if (existing) {
+    existing.shiire = (Number(existing.shiire) || 0) + (Number(shiire) || 0);
+    existing.updatedAt = nowStr();
+    showToast('仕入れ数を加算しました');
+  } else {
+    items.push({
+      id: Date.now().toString(),
+      hinmoku,
+      hinshu,
+      shiire: Number(shiire) || 0,
+      zanzai: null,
+      updatedAt: nowStr()
+    });
+  }
+
+  document.getElementById('new-hinmoku').value = '';
+  document.getElementById('new-hinshu').value = '';
+  document.getElementById('new-shiire').value = '';
+  renderTable();
+}
+
+// ===== DELETE =====
+function deleteItem(id) {
+  if (!confirm('この品目を削除しますか？')) return;
+  items = items.filter(i => i.id !== id);
+  renderTable();
+}
+
+// ===== SAVE =====
+async function saveData() {
+  const now = nowStr();
+  document.getElementById('last-updated').textContent = '最終更新：' + now;
+
+  // localStorageに保存（オフラインバックアップ）
+  localStorage.setItem('hana_items', JSON.stringify(items));
+
+  if (!gasUrl) {
+    showToast('URLが未設定です（ローカルに保存しました）');
+    return;
+  }
+
+  try {
+    const btn = document.getElementById('save-btn');
+    btn.textContent = '送信中...';
+    btn.disabled = true;
+
+    await fetch(gasUrl, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items, updatedAt: now, mode: currentMode })
+    });
+
+    showToast('✓ 保存・送信しました');
+  } catch(e) {
+    showToast('送信失敗（ローカルに保存済み）');
+  } finally {
+    const btn = document.getElementById('save-btn');
+    btn.textContent = currentMode === 'honsha' ? '仕入れ数を保存・送信' : '残数を保存・送信';
+    btn.disabled = false;
+  }
+}
+
+// ===== UTILS =====
+function nowStr() {
+  const d = new Date();
+  return `${d.getFullYear()}/${String(d.getMonth()+1).padStart(2,'0')}/${String(d.getDate()).padStart(2,'0')} ${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`;
+}
+
+function esc(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+</script>
+
+</body>
+</html>
