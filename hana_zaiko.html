@@ -102,10 +102,20 @@
     padding: 24px;
     gap: 16px;
   }
+
   #settings-screen h1 { font-size: 20px; font-weight: 700; text-align: center; }
   #settings-screen p { color: var(--text-sub); font-size: 13px; text-align: center; }
-  .settings-form { width: 100%; max-width: 320px; display: flex; flex-direction: column; gap: 10px; }
+
+  .settings-form {
+    width: 100%;
+    max-width: 320px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
   .settings-label { font-size: 13px; font-weight: 600; color: var(--text-sub); }
+
   .settings-input {
     width: 100%;
     padding: 12px;
@@ -115,6 +125,7 @@
     background: var(--white);
   }
   .settings-input:focus { outline: none; border-color: var(--green); }
+
   .settings-current {
     font-size: 11px;
     color: var(--text-sub);
@@ -123,6 +134,7 @@
     padding: 8px 10px;
     border-radius: 6px;
   }
+
   .settings-save-btn {
     width: 100%;
     padding: 14px;
@@ -134,6 +146,7 @@
     font-weight: 700;
     cursor: pointer;
   }
+
   .settings-back-btn {
     width: 100%;
     padding: 12px;
@@ -162,6 +175,7 @@
   }
 
   .header-title { font-size: 16px; font-weight: 700; }
+
   .header-mode {
     font-size: 12px;
     padding: 4px 10px;
@@ -175,7 +189,6 @@
     font-size: 12px;
     color: var(--text-sub);
     background: none;
-    border: none;
     cursor: pointer;
     padding: 4px 8px;
     border-radius: 6px;
@@ -185,37 +198,6 @@
   /* ===== CONTENT ===== */
   .content { padding: 12px 12px 80px; }
 
-  /* GAS設定バナー */
-  .gas-banner {
-    background: #fff8e1;
-    border: 1px solid #ffd54f;
-    border-radius: var(--radius);
-    padding: 12px 14px;
-    margin-bottom: 12px;
-    font-size: 13px;
-    color: #5d4037;
-  }
-  .gas-banner strong { display: block; margin-bottom: 4px; }
-  .gas-url-form { display: flex; gap: 8px; margin-top: 8px; }
-  .gas-url-input {
-    flex: 1;
-    padding: 8px 10px;
-    border: 1px solid var(--border);
-    border-radius: 6px;
-    font-size: 13px;
-  }
-  .gas-url-save {
-    padding: 8px 14px;
-    background: var(--green);
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 13px;
-    font-weight: 600;
-    cursor: pointer;
-  }
-
-  /* 最終更新日 */
   .last-updated {
     font-size: 12px;
     color: var(--text-sub);
@@ -233,10 +215,7 @@
     margin-bottom: 12px;
   }
 
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
+  table { width: 100%; border-collapse: collapse; }
 
   thead th {
     background: #f2f2ef;
@@ -280,7 +259,6 @@
   .num-input::-webkit-inner-spin-button { -webkit-appearance: none; }
   .num-input:focus { outline: none; border-color: var(--blue); }
 
-  /* 本社モード：削除ボタン */
   .del-btn {
     background: none;
     border: none;
@@ -293,7 +271,7 @@
   }
   .del-btn:active { background: var(--red-light); }
 
-  /* ===== ADD FORM (本社のみ) ===== */
+  /* ===== ADD FORM ===== */
   .add-form {
     background: var(--white);
     border-radius: var(--radius);
@@ -319,7 +297,7 @@
   .add-input {
     flex: 1;
     min-width: 80px;
-    padding: 10px 10px;
+    padding: 10px;
     border: 1px solid var(--border);
     border-radius: 6px;
     font-size: 14px;
@@ -341,12 +319,10 @@
   }
   .add-btn:active { opacity: 0.8; }
 
-  /* ===== SAVE BUTTON ===== */
+  /* ===== SAVE BAR ===== */
   .save-bar {
     position: fixed;
-    bottom: 0;
-    left: 0;
-    right: 0;
+    bottom: 0; left: 0; right: 0;
     padding: 12px 16px;
     background: var(--white);
     border-top: 1px solid var(--border);
@@ -387,7 +363,6 @@
   }
   .toast.show { opacity: 1; }
 
-  /* ===== LOADING ===== */
   .loading {
     text-align: center;
     padding: 24px;
@@ -395,7 +370,6 @@
     font-size: 14px;
   }
 
-  /* ===== EMPTY ===== */
   .empty {
     text-align: center;
     padding: 32px 16px;
@@ -416,7 +390,7 @@
 </div>
 
 <!-- 設定画面 -->
-<div id="settings-screen" style="display:none;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;padding:24px;gap:16px;">
+<div id="settings-screen">
   <h1>⚙️ GAS URL設定</h1>
   <p>Google Apps ScriptのデプロイURLを入力してください</p>
   <div class="settings-form">
@@ -440,17 +414,6 @@
   </div>
 
   <div class="content">
-
-    <!-- GAS URL設定バナー -->
-    <div class="gas-banner" id="gas-banner">
-      <strong>⚙️ 初期設定：Google Apps Script URLを入力してください</strong>
-      <span>設定後はデータがGoogleスプレッドシートと同期されます</span>
-      <div class="gas-url-form">
-        <input class="gas-url-input" id="gas-url-input" type="url" placeholder="https://script.google.com/..." />
-        <button class="gas-url-save" onclick="saveGasUrl()">保存</button>
-      </div>
-    </div>
-
     <div class="last-updated" id="last-updated">最終更新：-</div>
 
     <!-- 品目追加フォーム（本社のみ） -->
@@ -467,18 +430,14 @@
     <!-- テーブル -->
     <div class="table-wrap">
       <table>
-        <thead>
-          <tr id="table-head"></tr>
-        </thead>
+        <thead><tr id="table-head"></tr></thead>
         <tbody id="table-body">
-          <tr><td colspan="6" class="loading">読み込み中...</td></tr>
+          <tr><td colspan="5" class="loading">読み込み中...</td></tr>
         </tbody>
       </table>
     </div>
-
   </div>
 
-  <!-- 保存ボタン -->
   <div class="save-bar">
     <button class="save-btn" id="save-btn" onclick="saveData()">保存して送信</button>
   </div>
@@ -487,20 +446,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
-// ===== STATE =====
-let currentMode = null; // 'honsha' | 'kyoten'
-let items = []; // [{id, hinmoku, hinshu, shiire, zanzai, updatedAt}]
+let currentMode = null;
+let items = [];
 let gasUrl = '';
 
 // ===== INIT =====
 window.addEventListener('DOMContentLoaded', () => {
   gasUrl = localStorage.getItem('gasUrl') || '';
-  const savedMode = localStorage.getItem('lastMode');
-  if (gasUrl) {
-    document.getElementById('gas-banner').style.display = 'none';
-  } else {
-    document.getElementById('gas-url-input').value = gasUrl;
-  }
 });
 
 // ===== SETTINGS =====
@@ -522,7 +474,6 @@ function saveSettingsUrl() {
   if (!val.startsWith('https://')) { showToast('正しいURLを入力してください'); return; }
   gasUrl = val;
   localStorage.setItem('gasUrl', gasUrl);
-  document.getElementById('gas-banner').style.display = 'none';
   showToast('URLを保存しました');
   closeSettings();
 }
@@ -548,113 +499,82 @@ function selectMode(mode) {
 }
 
 function changeMode() {
-  document.getElementById('mode-screen').style.display = 'flex';
   document.getElementById('app').style.display = 'none';
+  document.getElementById('mode-screen').style.display = 'flex';
 }
 
-// ===== GAS URL =====
-function saveGasUrl() {
-  const val = document.getElementById('gas-url-input').value.trim();
-  if (!val.startsWith('https://')) { showToast('正しいURLを入力してください'); return; }
-  gasUrl = val;
-  localStorage.setItem('gasUrl', gasUrl);
-  document.getElementById('gas-banner').style.display = 'none';
-  showToast('URLを保存しました');
-  loadData();
-}
-
-// ===== LOAD DATA =====
+// ===== LOAD =====
 async function loadData() {
-  if (!gasUrl) {
-    renderTable();
-    return;
-  }
+  if (!gasUrl) { renderTable(); return; }
   try {
     const res = await fetch(gasUrl + '?action=get');
     const data = await res.json();
     if (data.items) {
       items = data.items;
-      const lastAt = data.updatedAt || '';
-      document.getElementById('last-updated').textContent = '最終更新：' + (lastAt || '-');
+      document.getElementById('last-updated').textContent = '最終更新：' + (data.updatedAt || '-');
     }
   } catch(e) {
-    // オフライン時はlocalStorageから
     const local = localStorage.getItem('hana_items');
     if (local) items = JSON.parse(local);
   }
   renderTable();
 }
 
-// ===== RENDER TABLE =====
+// ===== RENDER =====
 function renderTable() {
-  // ヘッダー
   const head = document.getElementById('table-head');
   if (currentMode === 'honsha') {
     head.innerHTML = `
-      <th>品目</th>
-      <th>品種(色)</th>
+      <th>品目</th><th>品種(色)</th>
       <th style="text-align:right">仕入数</th>
       <th style="text-align:right">残数</th>
-      <th></th>
-    `;
+      <th></th>`;
   } else {
     head.innerHTML = `
-      <th>品目</th>
-      <th>品種(色)</th>
+      <th>品目</th><th>品種(色)</th>
       <th style="text-align:right">仕入数</th>
-      <th style="text-align:right">残数入力</th>
-    `;
+      <th style="text-align:right">残数入力</th>`;
   }
 
-  // ソート：残数が少ない順（入力済みのみ）
   const sorted = [...items].sort((a, b) => {
-    const az = a.zanzai !== '' && a.zanzai !== null && a.zanzai !== undefined ? Number(a.zanzai) : 9999;
-    const bz = b.zanzai !== '' && b.zanzai !== null && b.zanzai !== undefined ? Number(b.zanzai) : 9999;
+    const az = (a.zanzai !== '' && a.zanzai !== null && a.zanzai !== undefined) ? Number(a.zanzai) : 9999;
+    const bz = (b.zanzai !== '' && b.zanzai !== null && b.zanzai !== undefined) ? Number(b.zanzai) : 9999;
     return az - bz;
   });
 
   const tbody = document.getElementById('table-body');
-
   if (sorted.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" class="empty">品目がありません<br>本社モードで追加してください</td></tr>`;
     return;
   }
 
   tbody.innerHTML = sorted.map(item => {
-    const zanzaiVal = item.zanzai !== '' && item.zanzai !== null && item.zanzai !== undefined ? Number(item.zanzai) : null;
-    const shiireVal = item.shiire !== '' && item.shiire !== null ? Number(item.shiire) : 0;
+    const zanzaiVal = (item.zanzai !== '' && item.zanzai !== null && item.zanzai !== undefined) ? Number(item.zanzai) : null;
+    const shiireVal = (item.shiire !== '' && item.shiire !== null) ? Number(item.shiire) : 0;
     const zanzaiClass = zanzaiVal === null ? '' : (zanzaiVal <= shiireVal * 0.2 ? 'low' : 'ok');
 
     if (currentMode === 'honsha') {
-      return `
-        <tr>
-          <td class="col-hinmoku">${esc(item.hinmoku)}</td>
-          <td class="col-hinshu">${esc(item.hinshu)}</td>
-          <td class="col-shiire">
-            <input class="num-input" type="number" min="0"
-              value="${shiireVal}"
-              onchange="updateShiire('${item.id}', this.value)"
-            />
-          </td>
-          <td class="col-zanzai ${zanzaiClass}">${zanzaiVal !== null ? zanzaiVal + '本' : '-'}</td>
-          <td><button class="del-btn" onclick="deleteItem('${item.id}')">✕</button></td>
-        </tr>
-      `;
+      return `<tr>
+        <td class="col-hinmoku">${esc(item.hinmoku)}</td>
+        <td class="col-hinshu">${esc(item.hinshu)}</td>
+        <td class="col-shiire">
+          <input class="num-input" type="number" min="0" value="${shiireVal}"
+            onchange="updateShiire('${item.id}', this.value)" />
+        </td>
+        <td class="col-zanzai ${zanzaiClass}">${zanzaiVal !== null ? zanzaiVal + '本' : '-'}</td>
+        <td><button class="del-btn" onclick="deleteItem('${item.id}')">✕</button></td>
+      </tr>`;
     } else {
-      return `
-        <tr>
-          <td class="col-hinmoku">${esc(item.hinmoku)}</td>
-          <td class="col-hinshu">${esc(item.hinshu)}</td>
-          <td class="col-shiire">${shiireVal}本</td>
-          <td>
-            <input class="num-input" type="number" min="0"
-              value="${zanzaiVal !== null ? zanzaiVal : ''}"
-              placeholder="0"
-              onchange="updateZanzai('${item.id}', this.value)"
-            />
-          </td>
-        </tr>
-      `;
+      return `<tr>
+        <td class="col-hinmoku">${esc(item.hinmoku)}</td>
+        <td class="col-hinshu">${esc(item.hinshu)}</td>
+        <td class="col-shiire">${shiireVal}本</td>
+        <td>
+          <input class="num-input" type="number" min="0"
+            value="${zanzaiVal !== null ? zanzaiVal : ''}" placeholder="0"
+            onchange="updateZanzai('${item.id}', this.value)" />
+        </td>
+      </tr>`;
     }
   }).join('');
 }
@@ -677,10 +597,8 @@ function addItem() {
   const hinmoku = document.getElementById('new-hinmoku').value.trim();
   const hinshu  = document.getElementById('new-hinshu').value.trim();
   const shiire  = document.getElementById('new-shiire').value;
-
   if (!hinmoku) { showToast('品目を入力してください'); return; }
 
-  // 同じ品目＋品種が既にある場合は仕入れ数を加算
   const existing = items.find(i => i.hinmoku === hinmoku && i.hinshu === hinshu);
   if (existing) {
     existing.shiire = (Number(existing.shiire) || 0) + (Number(shiire) || 0);
@@ -689,8 +607,7 @@ function addItem() {
   } else {
     items.push({
       id: Date.now().toString(),
-      hinmoku,
-      hinshu,
+      hinmoku, hinshu,
       shiire: Number(shiire) || 0,
       zanzai: null,
       updatedAt: nowStr()
@@ -714,32 +631,25 @@ function deleteItem(id) {
 async function saveData() {
   const now = nowStr();
   document.getElementById('last-updated').textContent = '最終更新：' + now;
-
-  // localStorageに保存（オフラインバックアップ）
   localStorage.setItem('hana_items', JSON.stringify(items));
 
-  if (!gasUrl) {
-    showToast('URLが未設定です（ローカルに保存しました）');
-    return;
-  }
+  if (!gasUrl) { showToast('URLが未設定です（ローカルに保存しました）'); return; }
+
+  const btn = document.getElementById('save-btn');
+  btn.textContent = '送信中...';
+  btn.disabled = true;
 
   try {
-    const btn = document.getElementById('save-btn');
-    btn.textContent = '送信中...';
-    btn.disabled = true;
-
-    await fetch(gasUrl, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ items, updatedAt: now, mode: currentMode })
+    const payload = { items, updatedAt: now, mode: currentMode };
+    const encoded = encodeURIComponent(JSON.stringify(payload));
+    await fetch(gasUrl + '?action=save&data=' + encoded, {
+      method: 'GET',
+      mode: 'no-cors'
     });
-
     showToast('✓ 保存・送信しました');
   } catch(e) {
     showToast('送信失敗（ローカルに保存済み）');
   } finally {
-    const btn = document.getElementById('save-btn');
     btn.textContent = currentMode === 'honsha' ? '仕入れ数を保存・送信' : '残数を保存・送信';
     btn.disabled = false;
   }
